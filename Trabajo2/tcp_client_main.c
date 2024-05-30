@@ -16,7 +16,7 @@ void tcp_client(uint16_t newPort, char* newIpHost);
 void app_main(void)
 {
     
-    wifi_conection("VELEZ","42880670");
+    wifi_conection("HUAWEI P30 lite","pagueplan");
 
     /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
      * Read "Establishing Wi-Fi or Ethernet Connection" section in
