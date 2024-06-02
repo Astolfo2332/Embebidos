@@ -120,35 +120,11 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     }
 }
 
-static void mqtt_app_start(void)
+static void mqtt_app_start(char* broker_url)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = CONFIG_BROKER_URL,
+        .broker.address.uri = strcat("mqtt://",broker_url) , 
     };
-#if CONFIG_BROKER_URL_FROM_STDIN // HANDLER DENTRO DE UNA FUNCION ENTONCES VARIABLE LOCAL ENTONCES TENGO QUE REDEFINIRIE SA VARIABLE EN OTRO LADO
-    char line[128];
-
-    if (strcmp(mqtt_cfg.broker.address.uri, "FROM_STDIN") == 0) {
-        int count = 0;
-        printf("Please enter url of mqtt broker\n");"wifi_conection.c" "lm75.c"
-        while (count < 128) {
-            int c = fgetc(stdin);
-            if (c == '\n') {
-                line[count] = '\0';
-                break;
-            } else if (c > 0 && c < 127) {
-                line[count] = c;
-                ++count;
-            }
-            vTaskDelay(10 / portTICK_PERIOD_MS);
-        }
-        mqtt_cfg.broker.address.uri = line;
-        printf("Broker url: %s\n", line);
-    } else {
-        ESP_LOGE(TAG, "Configuration mismatch: wrong broker url");
-        abort();
-    }
-#endif /* CONFIG_BROKER_URL_FROM_STDIN */
 
     client = esp_mqtt_client_init(&mqtt_cfg);
     /* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
@@ -174,7 +150,7 @@ void app_main(void)
     wifi_conection("HUAWEI P30 lite","pagueplan");
     dev2=screen_init(8,3);
  
-    mqtt_app_start();
+    mqtt_app_start("192.168.43.142");
     //Y como se hace una comunicación entre aplicaciones? como todo en la vida con comunicación y amor
     lmqueue = xQueueCreate(4,sizeof(float));
     xTaskCreate(&tem_app,"temp",6000,NULL,5,NULL);
