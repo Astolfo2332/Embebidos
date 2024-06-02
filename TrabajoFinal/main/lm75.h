@@ -1,0 +1,1 @@
+void tem_app(void *);

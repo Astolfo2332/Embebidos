@@ -1,0 +1,1 @@
+void wifi_conection(char* newssdi,char* newpass);
