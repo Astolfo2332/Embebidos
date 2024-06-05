@@ -11,8 +11,8 @@ extern QueueHandle_t lmqueue;
 
 static const char *TAG = "TEMP_READER";
 
-#define I2C_MASTER_SCL_IO           5      /*!< GPIO number used for I2C master clock */
-#define I2C_MASTER_SDA_IO           6      /*!< GPIO number used for I2C master data  */
+#define I2C_MASTER_SCL_IO           39      /*!< GPIO number used for I2C master clock */
+#define I2C_MASTER_SDA_IO           38      /*!< GPIO number used for I2C master data  */
 #define I2C_MASTER_NUM              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
 #define I2C_MASTER_FREQ_HZ          400000                     /*!< I2C master clock frequency */
 #define I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
@@ -72,33 +72,59 @@ void temp_init(void){
     ESP_ERROR_CHECK( i2c_master_bus_add_device(bus_handle2,&lmconf,&dev_handle2));
 }
 
+void swap(uint16_t* a,uint16_t* b){
+    uint16_t t= *a;
+    *a=*b;
+    *b=t;
+}
+
+int partition(uint16_t array[],int low,int high){
+    uint16_t pivot=array[high];
+    int j=(low-1);
+    for (int k=low; k<=high-1; k++) {
+        if (array[k]<pivot) {
+            j++;
+            swap(&array[j],&array[k]);
+        }
+    
+    }
+    swap(&array[j+1],&array[high]);
+    return (j+1);
+}
+
+
+
+void quickshort(uint16_t array[],int low, int high){
+    if (low<high) {
+        int pi = partition(array,low,high);
+        quickshort(array,low,pi-1);
+        quickshort(array,pi+1,high);
+    }
+}
 
 void tem_app(void *)
 {
     
     uint8_t data[3];
     uint16_t temp;
-    float vec[]={3,5,4,2,1};
-    int n= sizeof(vec)/sizeof(vec[0]);
-    float tempsi;
+    uint16_t vec[11];
+    int n= 11;
     float temp_data;
     temp_init();
     ESP_LOGI(TAG, "I2C initialized successfully");
-
-    while (true)
+        while (true)
     {
     /* Read the LM75 WHO_AM_I register, on power up the register should have the value 0x71 */
-    ESP_ERROR_CHECK(i2c_master_receive(dev_handle2,data,16,-1));
-    temp=data[0]<<8;
-    temp|=data[1];
-    tempsi=(temp>>5)*0.125;
-
-    for (int i=0;i<n;i++){
-        vec[i]=tempsi;
-        vTaskDelay(500/portTICK_PERIOD_MS);
+    for (uint8_t i=0;i<n;i++){
+        ESP_ERROR_CHECK(i2c_master_receive(dev_handle2,data,16,100));
+        temp=data[0]<<8;
+        temp|=data[1];
+        temp=(temp>>5)*12.5;
+        vec[i]=temp;
+        vTaskDelay(250/portTICK_PERIOD_MS);
     }
 
-    for (int i = 0; i < n; i++)
+    /* for (int i = 0; i < n; i++)
     {
         for (int j = i; j < n; j++)
         {
@@ -111,9 +137,19 @@ void tem_app(void *)
             
         }
         
+    } */
+    
+    quickshort(vec,0,n);
+    for (uint8_t i = 0; i < 11; i++)
+    {
+        ESP_LOGI(TAG,"%d",vec[i]);
     }
-    temp_data=vec[2];
-    ESP_LOGI(TAG, "Temp = %.2f", vec[2]);
+
+    temp_data=(float) vec[5]/1000;
+    
+
+
+    ESP_LOGI(TAG, "Temp = %.2f", temp_data);
     if (xQueueSend(lmqueue,&temp_data,portMAX_DELAY)!=pdPASS)
     {
         ESP_LOGE("lm75_task","Fallo");
