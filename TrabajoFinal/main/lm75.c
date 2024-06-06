@@ -11,8 +11,8 @@ extern QueueHandle_t lmqueue;
 
 static const char *TAG = "TEMP_READER";
 
-#define I2C_MASTER_SCL_IO           39      /*!< GPIO number used for I2C master clock */
-#define I2C_MASTER_SDA_IO           38      /*!< GPIO number used for I2C master data  */
+#define I2C_MASTER_SCL_IO           9      /*!< GPIO number used for I2C master clock */
+#define I2C_MASTER_SDA_IO           8      /*!< GPIO number used for I2C master data  */
 #define I2C_MASTER_NUM              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
 #define I2C_MASTER_FREQ_HZ          400000                     /*!< I2C master clock frequency */
 #define I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
@@ -73,7 +73,7 @@ void temp_init(void){
 }
 
 void swap(uint16_t* a,uint16_t* b){
-    uint16_t t= *a;
+    float t= *a;
     *a=*b;
     *b=t;
 }
@@ -105,7 +105,7 @@ void quickshort(uint16_t array[],int low, int high){
 void tem_app(void *)
 {
     
-    uint8_t data[3];
+    uint8_t data[2];
     uint16_t temp;
     uint16_t vec[11];
     int n= 11;
@@ -116,21 +116,21 @@ void tem_app(void *)
     {
     /* Read the LM75 WHO_AM_I register, on power up the register should have the value 0x71 */
     for (uint8_t i=0;i<n;i++){
-        ESP_ERROR_CHECK(i2c_master_receive(dev_handle2,data,16,100));
+        if (i2c_master_receive(dev_handle2,data,2,1000)==ESP_OK)
+        {
         temp=data[0]<<8;
         temp|=data[1];
-        temp=(temp>>5)*12.5;
-        vec[i]=temp;
-        vTaskDelay(250/portTICK_PERIOD_MS);
+        vec[i]= (temp>>5)*12.5;
+        }
+        vTaskDelay(500/portTICK_PERIOD_MS);   /* code */
     }
-
     /* for (int i = 0; i < n; i++)
     {
         for (int j = i; j < n; j++)
         {
             if (vec[j]<vec[i])
             {
-                uint8_t a=vec[i];
+                float a=vec[i];
                 vec[i]= vec[j];
                 vec[j]=a;
             }
@@ -139,14 +139,9 @@ void tem_app(void *)
         
     } */
     
-    quickshort(vec,0,n);
-    for (uint8_t i = 0; i < 11; i++)
-    {
-        ESP_LOGI(TAG,"%d",vec[i]);
-    }
-
-    temp_data=(float) vec[5]/1000;
+    quickshort(vec,0,n-1);
     
+    temp_data=(float) vec[5]/100;
 
 
     ESP_LOGI(TAG, "Temp = %.2f", temp_data);
@@ -154,8 +149,6 @@ void tem_app(void *)
     {
         ESP_LOGE("lm75_task","Fallo");
     }
-    
-
     }
 
 }

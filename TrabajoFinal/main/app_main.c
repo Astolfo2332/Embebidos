@@ -38,9 +38,13 @@
 #include "freertos/task.h"
 
 #include "screen.h"
+#include "driver/gpio.h"
 
 static const char *TAG = "mqtt_example";
-// ACA DEFINO HANDLER 
+
+#define clear_button 15
+
+
 esp_mqtt_client_handle_t client;
 QueueHandle_t lmqueue;
 char payload[30]={0}; // lo que vamos a enviar al mqtt con la info
@@ -134,6 +138,8 @@ static void mqtt_app_start(char* broker_url)
 
 void app_main(void)
 {
+
+    gpio_set_direction(clear_button,GPIO_MODE_INPUT);
     
     SSD1306_t dev2;
     ESP_LOGI(TAG, "[APP] Startup..");
@@ -148,22 +154,27 @@ void app_main(void)
     esp_log_level_set("transport", ESP_LOG_VERBOSE);
     esp_log_level_set("outbox", ESP_LOG_VERBOSE);
     wifi_conection("HUAWEI P30 lite","pagueplan");
-    dev2=screen_init(8,3);
  
     mqtt_app_start("192.168.43.142");
     //Y como se hace una comunicación entre aplicaciones? como todo en la vida con comunicación y amor
+
+    dev2=screen_init(4,5);
     lmqueue = xQueueCreate(4,sizeof(float));
     xTaskCreate(&tem_app,"temp",6000,NULL,5,NULL);
     for(;;){
-        //tem_app();
-        
 
-        if (xQueueReceive(lmqueue,&temp_data,portMAX_DELAY)== pdPASS)
+        if (xQueueReceive(lmqueue,&temp_data,10)== pdPASS)
         {
         sprintf(payload, "{\"temp_data\":%.2f}",temp_data);
         (void)esp_mqtt_client_enqueue(client,"pruebaISAPAULI",payload,0,1,1,0);
         func_screen(dev2,temp_data); 
         }
+        if (gpio_get_level(clear_button))
+        {
+        (void)esp_mqtt_client_enqueue(client,"pruebaISAPAULI","{\"temp_data\":[]}",0,1,1,0);
+        ESP_LOGI(TAG,"Clear button pressed");
+        }
+        
     }
 
 }
