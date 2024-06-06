@@ -1,0 +1,299 @@
+[
+    {
+        "id": "a1312a8a6545e478",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "46becf335656a8dc",
+        "type": "inject",
+        "z": "a1312a8a6545e478",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 280,
+        "y": 160,
+        "wires": [
+            [
+                "757b0ecdb3555e63"
+            ]
+        ]
+    },
+    {
+        "id": "757b0ecdb3555e63",
+        "type": "debug",
+        "z": "a1312a8a6545e478",
+        "name": "debug 1",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "41f65a0547f956b4",
+        "type": "inject",
+        "z": "a1312a8a6545e478",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"contador\":1}",
+        "payloadType": "json",
+        "x": 290,
+        "y": 240,
+        "wires": [
+            [
+                "648316dc61c67d34",
+                "75bf49fdb7f32051"
+            ]
+        ]
+    },
+    {
+        "id": "648316dc61c67d34",
+        "type": "debug",
+        "z": "a1312a8a6545e478",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "75bf49fdb7f32051",
+        "type": "function",
+        "z": "a1312a8a6545e478",
+        "name": "function 1",
+        "func": "var temperatura = msg.payload.temp_data   \n\nif (msg.payload==\"{}\"){\n    return msg;    \n}\n\n// Create a new message with both extracted value\nvar container = [];\ncontainer = [{ payload: temperatura }];\nreturn container;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 320,
+        "wires": [
+            [
+                "0ea7a1512b36cd05",
+                "f56eac50af9b8ba7"
+            ]
+        ]
+    },
+    {
+        "id": "0615625b4573d777",
+        "type": "mqtt in",
+        "z": "a1312a8a6545e478",
+        "name": "",
+        "topic": "pruebaISAPAULI",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "3088b131221881c4",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 300,
+        "y": 520,
+        "wires": [
+            [
+                "607b95f6d2bc908e",
+                "75bf49fdb7f32051"
+            ]
+        ]
+    },
+    {
+        "id": "607b95f6d2bc908e",
+        "type": "debug",
+        "z": "a1312a8a6545e478",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "0ea7a1512b36cd05",
+        "type": "debug",
+        "z": "a1312a8a6545e478",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "f56eac50af9b8ba7",
+        "type": "ui_chart",
+        "z": "a1312a8a6545e478",
+        "name": "contador",
+        "group": "1c2fe92aab72279e",
+        "order": 16,
+        "width": 0,
+        "height": 0,
+        "label": "Temp",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 660,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c8999d3ab644b505",
+        "type": "inject",
+        "z": "a1312a8a6545e478",
+        "name": "Clear button",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "[]",
+        "payloadType": "json",
+        "x": 330,
+        "y": 60,
+        "wires": [
+            [
+                "f56eac50af9b8ba7"
+            ]
+        ]
+    },
+    {
+        "id": "3088b131221881c4",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "192.168.43.142",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "1c2fe92aab72279e",
+        "type": "ui_group",
+        "name": "Datos",
+        "tab": "9e902a74684c4a3f",
+        "order": 1,
+        "disp": true,
+        "width": "24",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "9e902a74684c4a3f",
+        "type": "ui_tab",
+        "name": "Datos",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
